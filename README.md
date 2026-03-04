@@ -79,7 +79,7 @@ Esto iniciarán:
 ## Estructura del Proyecto
 
 ```
-AxieClasifier/
+AxieLens/
 ├── app.py                    # Punto de entrada principal (orquestador)
 ├── core/
 │   ├── logic.py             # Capa de lógica de negocio (AxieLogic)
