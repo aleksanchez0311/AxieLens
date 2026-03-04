@@ -1,0 +1,10 @@
+{
+  "Name Of Owner": {
+    "wallet1": "0x...",
+    "wallet2": "0x..."
+  },
+  "Another Owner's Name": {
+    "wallet1": "0x...",
+    "wallet2": "0x..."
+  }
+}

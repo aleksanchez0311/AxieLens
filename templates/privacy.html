@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Política de Privacidad - Axie Clasifier</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0B0F19;
+            --bg-card: #151A2C;
+            --bg-card-hover: #1A2138;
+            --border-color: #262D47;
+            --accent-primary: #3B82F6;
+            --accent-secondary: #06B6D4;
+            --text-main: #F4F4F5;
+            --text-muted: #A1A1AA;
+            --transition-speed: 0.25s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Subtle background glow */
+        body::before {
+            content: '';
+            position: absolute;
+            top: -10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, rgba(11, 15, 25, 0) 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Outfit', sans-serif;
+            line-height: 1.2;
+            color: #FFFFFF;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 24px;
+            flex-grow: 1;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            font-size: 1.1rem;
+        }
+
+        ul {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        li {
+            padding: 24px;
+            margin-bottom: 16px;
+            background-color: var(--bg-base);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            border-left: 4px solid var(--accent-secondary);
+        }
+
+        li strong {
+            display: block;
+            color: #FFFFFF;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        li span {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 12px 24px;
+            background-color: var(--border-color);
+            color: var(--text-main);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all var(--transition-speed);
+        }
+
+        .back-link:hover {
+            background-color: var(--accent-secondary);
+            color: #000;
+            transform: translateY(-2px);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: auto;
+        }
+
+        footer span {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .container { padding: 40px 20px; }
+            .card { padding: 30px 20px; }
+            li { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔒 Política de Privacidad</h1>
+        
+        <div class="card">
+            <p>En Axie Clasifier, la privacidad y seguridad de la información de nuestros usuarios es primordial. A continuación, detallamos el manejo estrictamente confidencial de la información que utilizamos y procesamos en el aplicativo:</p>
+            
+            <ul>
+                <li>
+                    <strong>No Almacenamos Claves Privadas</strong>
+                    <span>Absolutamente todas las consultas ejecutadas hacia la base de datos se realizan de manera pública y anónima a través de la API RPC de la red Ronin y de proveedores autorizados. En ninguna circunstancia nuestro software pedirá o retendrá contraseñas, semillas ('seed phrases') o claves primarias.</span>
+                </li>
+                <li>
+                    <strong>Anonimicidad Operacional (Cero Logs)</strong>
+                    <span>El sistema está proyectado para funcionar sin conservar registros persistentes (Logs) que abarquen direcciones IP de origen, huellas dactilares de navegador o vínculos deterministas entre una identidad civil y una dirección criptográfica específica.</span>
+                </li>
+                <li>
+                    <strong>Análisis Perimetral de Datos Temporales</strong>
+                    <span>La información recabada (listados de inventario de Axies, genes morfológicos, etapas de evolución y clases) se almacena y procesa exclusivamente de manera efímera, alojada sobre la memoria pasante en tiempo real (RAM) del servidor. Esta información no traspasa bases de almacenamiento permanentes una vez devuelta la respuesta.</span>
+                </li>
+                <li>
+                    <strong>Transparencia Organizacional de Terceros</strong>
+                    <span>Para lograr eficientes resultados de consulta, accedemos mediante canales API oficiales de plataformas como Sky Mavis y ecosistema Moralis. Las operaciones subyacen y dependen del propio complimiento de Políticas T&C que ellos rigen intrínsecamente a sus servicios de red.</span>
+                </li>
+            </ul>
+
+            <p style="font-size: 0.95rem; font-style: italic;">
+                Dicha política se mantiene bajo reserva estricta de actualizarse conforme evolucione nuestra infraestructura, adaptándose a lineamientos y regulaciones en el sector de redes distribuidas.
+            </p>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="/" class="back-link">
+                    <i>←</i> <span>Regresar al Dashboard</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2026 <span>Axie Clasifier Architecture</span>. Todos los derechos reservados.<br>
+        Powered by Ronin Network RPC & Moralis API Integration.
+    </footer>
+</body>
+</html>

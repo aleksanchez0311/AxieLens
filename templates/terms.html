@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Términos de Uso - Axie Clasifier</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0B0F19;
+            --bg-card: #151A2C;
+            --bg-card-hover: #1A2138;
+            --border-color: #262D47;
+            --accent-primary: #3B82F6;
+            --accent-secondary: #06B6D4;
+            --text-main: #F4F4F5;
+            --text-muted: #A1A1AA;
+            --transition-speed: 0.25s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Subtle background glow */
+        body::before {
+            content: '';
+            position: absolute;
+            top: -10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, rgba(11, 15, 25, 0) 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Outfit', sans-serif;
+            line-height: 1.2;
+            color: #FFFFFF;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 24px;
+            flex-grow: 1;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        .intro-text {
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .term-section {
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .term-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .term-section h3 {
+            color: var(--accent-primary);
+            font-size: 1.4rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .term-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background-color: rgba(59, 130, 246, 0.15);
+            color: var(--accent-primary);
+            border-radius: 50%;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+        }
+
+        .term-section p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            line-height: 1.7;
+            padding-left: 44px;
+        }
+
+        .term-section strong {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 12px 24px;
+            background-color: var(--border-color);
+            color: var(--text-main);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all var(--transition-speed);
+        }
+
+        .back-link:hover {
+            background-color: var(--accent-primary);
+            color: #FFFFFF;
+            transform: translateY(-2px);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: auto;
+        }
+
+        footer span {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .container { padding: 40px 20px; }
+            .card { padding: 30px 20px; }
+            .term-section p { padding-left: 0; margin-top: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📜 Términos de Uso</h1>
+        
+        <p class="intro-text">
+            Al utilizar la herramienta <strong>Axie Clasifier</strong>, el usuario acepta de forma íntegra e irrevocable los siguientes términos, condiciones y normativas de uso interno:
+        </p>
+
+        <div class="card">
+            
+            <div class="term-section">
+                <h3><span class="term-number">1</span> Naturaleza Analítica de la Información</h3>
+                <p>Las valuaciones inferidas, reportes analíticos de genes, y comparativas de precios, son resultados estructurados desde la base de datos pública de <strong>Axie Infinity Marketplace</strong> provistas mediante un intermediario. Bajo mandato y en ninguna circunstancia esta información algorítmica debe considerarse estipulada como una recomendación o <strong>asesoría financiera, legal ni de inversión explícita.</strong></p>
+            </div>
+
+            <div class="term-section">
+                <h3><span class="term-number">2</span> Limitación de Responsabilidades y Resultados</h3>
+                <p>Las cuantificaciones son ponderaciones obtenidas en el preciso momento de la ejecución de la consulta. La economía y los activos Non-Fungible Tokens (NFTs) están expuestos a constante volatilidad, tendencias macro de la blockchain Ronin y liquidez asimétrica. <strong>El equipo de desarrollo e ingenieros de Axie Clasifier</strong> se eximen terminantemente de toda responsabilidad por deficiencias estructurales de precios ni pérdidas financieras atribuidas al uso deductivo de esta herramienta.</p>
+            </div>
+
+            <div class="term-section">
+                <h3><span class="term-number">3</span> Exigencia de Ética y Uso Responsable</h3>
+                <p>Al portar y utilizar una sub-red del ecosistema o acceso mediante API REST, el operador deniega tajantemente emplear procesos automatizados hiper intensivos. Está terminantemente prohibido ejecutar asincronismos para desencadenar <strong>ataques algorítmicos DDoS, saturación deliberada de endpoints (Sky Mavis / Moralis) y extracciones masivas tipo 'Scraping' descontrolado.</strong> El uso es en función a búsquedas ponderadas, no perjudiciales.</p>
+            </div>
+
+            <div class="term-section">
+                <h3><span class="term-number">4</span> Auto-custodia de Accesos Sensibles</h3>
+                <p>Usted asume el rol íntegro de administrador local. Será el <strong>único arquitecto responsable</strong> en proteger el archivo `.env`, llaves privadas, API keys de Telegram (Bot Token) y credenciales de acceso incrustadas a nivel terminal. Nosotros no reescribimos remotamente archivos por lo cual no salvaguardamos su cadena principal en fallos endógenos del operario.</p>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="/" class="back-link">
+                    <i>←</i> <span>Regresar al Dashboard</span>
+                </a>
+            </div>
+            
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2026 <span>Axie Clasifier Architecture</span>. Todos los derechos reservados.<br>
+        Powered by Ronin Network RPC & Moralis API Integration.
+    </footer>
+</body>
+</html>
