@@ -32,5 +32,6 @@ EXPOSE 7860
 # Variable de entorno para modo producción
 ENV PYTHONUNBUFFERED=1
 
+
 # Comando por defecto
 CMD ["python", "run_cloud.py"]
