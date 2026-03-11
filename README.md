@@ -1,4 +1,3 @@
-# Axie Lens - Despliegue en Hugging Spaces
 ---
 title: Axie Lens
 emoji: 🦁
@@ -10,6 +9,7 @@ python_version: "3.13.6"
 app_file: run_cloud.py
 pinned: false
 ---
+# Axie Lens - Despliegue en Hugging Spaces
 
 ## 🚀 Despliegue Rápido
 
