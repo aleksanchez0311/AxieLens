@@ -166,7 +166,7 @@ El algoritmo utiliza un sistema de fallback progresivo con 7 pasos:
 ### interfaces/server.py
 
 - Servidor Flask
-- Puerto 5000 por defecto
+- Puerto 7860 por defecto
 - Rutas: `/`, `/privacy`, `/terms`
 - Usa threading para ejecución en segundo plano
 

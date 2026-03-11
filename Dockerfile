@@ -26,11 +26,11 @@ COPY . .
 # Crear directorio para variables de entorno
 RUN mkdir -p /app
 
-# Exponer puerto (Hugging Spaces usa 7860 por defecto, pero Flask usa 5000)
-EXPOSE 5000
+# Exponer puerto (Hugging Spaces usa 7860 por defecto)
+EXPOSE 7860
 
 # Variable de entorno para modo producción
 ENV PYTHONUNBUFFERED=1
 
-# Comando por defecto - ejecutar el servidor web
-CMD ["python", "-c", "from interfaces.server import run_server; run_server(port=5000)"]
+# Comando por defecto
+CMD ["python", "run_cloud.py"]

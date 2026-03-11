@@ -38,7 +38,7 @@
 
 ### Puerto y URL
 
-- **Puerto**: 5000
+- **Puerto**: 7860
 - **URL**: `https://tu-usuario-axielens.hf.space`
 
 ### Limitaciones en Hugging Spaces
@@ -62,7 +62,7 @@ La aplicación en Hugging Spaces funcionará como una **API web**:
 ```bash
 # Con Docker
 docker build -t axielens .
-docker run -p 5000:5000 -e SKYMAVIS_API_KEY=tu_key axielens
+docker run -p 7860:7860 -e SKYMAVIS_API_KEY=tu_key axielens
 
 # Sin Docker (requiere Node.js)
 pip install -r requirements.txt
@@ -96,7 +96,7 @@ AxieLens/
 - Añade la variable en la configuración del Space
 
 **Error: Puerto en uso**
-- Hugging Spaces usa el puerto 5000 por defecto
+- Hugging Spaces usa el puerto 7860 por defecto
 
 **Build falla**
 - Verifica que Node.js esté disponible en el Dockerfile

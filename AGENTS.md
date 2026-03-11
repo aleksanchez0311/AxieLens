@@ -87,7 +87,7 @@ AxieLens/
 
 ### Servidor Web
 
-- [`interfaces/server.py`](interfaces/server.py:1) usa Flask para servir HTML desde `templates/` en el puerto 5000 por defecto.
+- [`interfaces/server.py`](interfaces/server.py:1) usa Flask para servir HTML desde `templates/` en el puerto 7860 por defecto.
 - Rutas: `/`, `/privacy`, `/terms`.
 - Se inicia en segundo plano al ejecutar `app.py`.
 

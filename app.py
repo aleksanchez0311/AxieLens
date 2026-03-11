@@ -17,8 +17,8 @@ if __name__ == "__main__":
     print("\n[1/3] Iniciando servidor web...")
     from interfaces.server import start_web_background
 
-    web_thread = start_web_background(port=5000)
-    print("    ✓ Servidor web iniciado en puerto 5000")
+    web_thread = start_web_background(port=7860)
+    print("    ✓ Servidor web iniciado en puerto 7860")
 
     # 2. Lanzar Bot de Telegram en segundo plano
     print("\n[2/3] Iniciando Bot de Telegram...")
