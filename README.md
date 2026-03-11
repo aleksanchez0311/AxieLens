@@ -6,8 +6,8 @@ colorFrom: blue
 colorTo: green
 sdk: docker
 sdk_version: "1.0"
-python_version: "3.11"
-app_file: app.py
+python_version: "3.13.6"
+app_file: run_cloud.py
 pinned: false
 ---
 
