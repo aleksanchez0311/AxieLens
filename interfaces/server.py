@@ -43,7 +43,7 @@ def run_server(port=5000):
     """Función para correr el servidor en un puerto específico."""
     print("\n")
     print(f"🌐 Servidor Web disponible en: http://127.0.0.1:{port}")
-    app.run(host="127.0.0.1", port=port, debug=False, use_reloader=False)
+    app.run(host="0.0.0.0", port=port, debug=False, use_reloader=False)
 
 
 def start_web_background(port=5000):
