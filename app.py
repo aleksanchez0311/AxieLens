@@ -10,7 +10,7 @@ if __name__ == "__main__":
     import sys
 
     print("=" * 50)
-    print("🚀 AXIE CLASIFIER - ORQUESTADOR PRINCIPAL")
+    print("🚀 AXIE LENS - ORQUESTADOR PRINCIPAL")
     print("=" * 50)
 
     # 1. Iniciar servidor web en segundo plano

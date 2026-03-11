@@ -33,7 +33,6 @@ logging.basicConfig(
 # Inicializar lógica central y tokens
 logic = AxieLogic()
 TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
-AUTHORIZED_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 
 # Estados de la conversación
 (

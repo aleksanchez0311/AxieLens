@@ -1,5 +1,5 @@
 # ============================================
-# AxieClassifier - Hugging Spaces Dockerfile
+# Axie Lens - Hugging Spaces Dockerfile
 # ============================================
 
 FROM python:3.11-slim

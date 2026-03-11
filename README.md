@@ -1,4 +1,4 @@
-# AxieClassifier - Despliegue en Hugging Spaces
+# Axie Lens - Despliegue en Hugging Spaces
 
 ## 🚀 Despliegue Rápido
 
@@ -40,7 +40,7 @@
 ### Puerto y URL
 
 - **Puerto**: 5000
-- **URL**: `https://tu-usuario-axieclassifier.hf.space`
+- **URL**: `https://tu-usuario-axielens.hf.space`
 
 ### Limitaciones en Hugging Spaces
 
@@ -62,8 +62,8 @@ La aplicación en Hugging Spaces funcionará como una **API web**:
 
 ```bash
 # Con Docker
-docker build -t axieclassifier .
-docker run -p 5000:5000 -e SKYMAVIS_API_KEY=tu_key axieclassifier
+docker build -t axielens .
+docker run -p 5000:5000 -e SKYMAVIS_API_KEY=tu_key axielens
 
 # Sin Docker (requiere Node.js)
 pip install -r requirements.txt
@@ -73,7 +73,7 @@ python -c "from interfaces.server import run_server; run_server()"
 ### Estructura del Proyecto
 
 ```
-AxieClassifier/
+AxieLens/
 ├── app.py                    # Orquestador principal
 ├── Dockerfile                # Imagen Docker
 ├── app.yaml                 # Configuración Hugging Spaces

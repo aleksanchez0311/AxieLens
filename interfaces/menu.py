@@ -73,7 +73,7 @@ def format_axie_message(data):
 def main():
     while True:
         print("\n" + "=" * 30)
-        print("   AXIE CLASIFIER - MENU")
+        print("   AXIE LENS - MENU")
         print("=" * 30)
         print("1. Consultar Axie por ID")
         print("2. Listar Billetera (Detalle)")
