@@ -113,7 +113,6 @@ El archivo `.env` debe residir en la raíz y contener:
 ### Telegram (Opcional)
 
 - `TELEGRAM_TOKEN`: Token del bot de Telegram
-- `TELEGRAM_CHAT_ID`: ID de chat autorizado (si está vacío, permite cualquier usuario)
 
 ## Archivo wallets_for_first_owner_finding.json
 

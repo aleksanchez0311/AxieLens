@@ -177,7 +177,6 @@ El algoritmo utiliza un sistema de fallback progresivo con 7 pasos:
 | SKYMAVIS_API_KEY        | Sí        | -                                                                            | API key de Sky Mavis              |
 | ENDPOINT_GRAPHQL        | No        | https://api-gateway.skymavis.com/graphql/axie-marketplace                    | Endpoint GraphQL de Axies         |
 | TELEGRAM_TOKEN          | No        | -                                                                            | Token del bot                     |
-| TELEGRAM_CHAT_ID        | No        | -                                                                            | ID de chat autorizado             |
 
 ## Rate Limiting
 

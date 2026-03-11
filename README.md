@@ -22,7 +22,6 @@
    - En la configuración del Space, añade los secrets:
      - `SKYMAVIS_API_KEY`: Tu API key de Sky Mavis
      - `TELEGRAM_TOKEN`: (Opcional) Token de tu bot de Telegram
-     - `TELEGRAM_CHAT_ID`: (Opcional) ID de chat autorizado
 
 4. **Despliegue Automático**
    - Cada push a main activará un nuevo build
