@@ -1,87 +1,88 @@
-# Especificaciones Técnicas - Axie Classifier
+# Especificaciones Técnicas - Axie Lens
 
 ## Visión General
 
-Axie Classifier es una aplicación que conecta con las APIs de Moralis y Sky Mavis para obtener datos de Axies NFT en la blockchain Ronin y calcular su valuación de mercado.
+Axie Lens es una aplicación que conecta con la API de Sky Mavis para obtener datos de Axies NFT en la blockchain Ronin y calcular su valuación de mercado. El sistema utiliza una arquitectura Python → Node.js donde Python orquesta las llamadas a scripts JavaScript que realizan las peticiones a la API.
+
+## Arquitectura del Sistema
+
+### Flujo de Datos
+
+```
+Python (app.py, logic.py)
+    ↓ 调用
+Python (endpoint.py) - Wrapper
+    ↓ subprocess.run(env=...)
+Node.js (endpoint.js) - API calls
+    ↓ HTTP
+Sky Mavis GraphQL API
+```
 
 ## APIs Utilizadas
 
-### Moralis API
-
-- **Propósito**: Obtener datos de Axies y billeteras
-- **Endpoints**:
-  - `/nft/{contract}/{token_id}` - Datos de un Axie
-  - `/{wallet_address}/nft` - Axies de una billetera
-  - `/nft/{contract}/{token_id}/transfers` - Historial de transferencias
-- **Rate Limiting**: Reintento automático tras 1 segundo (código 429)
-- **URL por defecto**: `https://deep-index.moralis.io/api/v2.2`
-- **Contrato default**: `0x32953928646d7367332260ed41ce1841f3e97910`
-
 ### Sky Mavis GraphQL API
 
-- **Propósito**: Búsqueda en marketplace y valuación
-- **Query Principal**: `GetAxiesMarketplace`
-- **Ordenamiento**: PriceAsc (precio ascendente)
-- **Autenticación**: Bearer token + API Key + Cookie
-- **URL Base del Marketplace**: `https://app.axieinfinity.com/marketplace/axies/`
+- **Propósito**: Obtener datos de Axies, billeteras y búsqueda en marketplace
+- **Endpoints**:
+  - `https://api-gateway.skymavis.com/graphql/axie-marketplace` - Datos de Axies
+- **Autenticación**: API Key en header `x-api-key`
+- **Clase**: `endpoint.js` (funciones getAxieDetails, getWalletAxies, getSimilarAxies)
 
 ## Algoritmo de Valuación
 
 ### Flujo de Búsqueda de Similares
 
-El algoritmo utiliza un sistema de fallback progresivo con 6 pasos:
+El algoritmo utiliza un sistema de fallback progresivo con 7 pasos:
 
-1. **Paso 0**: Clase + Forma + 12 partes (dual base/EVO)
-2. **Paso 1**: Exacto (Forma/Clase/Evo)
-3. **Paso 2**: Clase + Partes (Sin Forma)
-4. **Paso 5**: Clase + Partes Base
-5. **Paso 6**: Solo Partes Base
-6. **Paso 9**: Core 4 (Mouth, Horn, Back, Tail)
+1. **bodyShape + class + parts** (original)
+2. **class + parts** (sin bodyShape)
+3. **class + parts sin eyes**
+4. **class + parts sin ears**
+5. **sin eyes y ears**
+6. **solo parts** (sin class)
+7. Si no hay resultados, retorna vacío
 
 ### Cálculo de Valuación
 
 - Se obtienen los 10 Axies más baratos que coinciden con los criterios
 - Se calcula la **mediana** de los precios en USD
-- Se genera URL de marketplace para el Axie encontrado
-
-### Detección de Evolución
-
-- **ID Base**: Se limpia el sufijo `-2` del ID de parte usando regex
-- **ID EVO**: Se añade `-2` al ID base para obtener versión evolucionada
-- El sistema busca tanto versiones base como EVO de cada parte
+- Métodos disponibles: min, max, avg, median, floor, percentile75
 
 ## Estructura de Datos
 
-### Axie (desde Moralis)
+### Axie (desde API)
 
 ```json
 {
-  "id": "token_id",
-  "owner_of": "dirección_wallet",
-  "metadata": {
-    "properties": {
-      "class": "Beast|Plant|Aquat|Insect|Bird|Reptile",
-      "stage": 4,
-      "bodyShape": "Slim|Fat"
-    }
-  },
+  "id": "9352681",
+  "name": "Terminator",
+  "class": "Reptile",
+  "stage": 4,
+  "owner": "0xcdd08182476f178f422a16a6be7cff0a1243de6c",
+  "bodyShape": "Normal",
+  "purity": 27,
   "parts": [
-    { "type": "Eyes|Ears|Mouth|Horn|Back|Tail", "id": "...", "stage": 1 }
-  ]
+    { "id": "eyes-tricky", "name": "Tricky", "class": "Reptile", "type": "Eyes" },
+    { "id": "ears-bubblemaker", "name": "Bubblemaker", "class": "Aquatic", "type": "Ears" }
+  ],
+  "stats": { "hp": 49, "morale": 44, "skill": 31, "speed": 40 },
+  "order": { "currentPriceUsd": "5.50" },
+  "transferHistory": {
+    "results": [
+      { "from": "0x3a27...", "to": "0x4948...", "timestamp": 1710558901 }
+    ],
+    "total": 3
+  }
 }
 ```
 
-### Valuación
+### Respuesta de Similares
 
 ```json
 {
-  "axie": { ... },
-  "valuation_usd": 0.0,
-  "similar_axie_id": "id_del_match",
-  "method": "descripción_del_paso",
-  "total_found": 0,
-  "similars_url": "url_de_búsqueda",
-  "similar_axie_url": "url_del_axie_encontrado"
+  "axies": [...],
+  "criteria": "bodyShapes: Normal, classes: Reptile, parts: [...]",
+  "total": 10
 }
 ```
 
@@ -89,10 +90,9 @@ El algoritmo utiliza un sistema de fallback progresivo con 6 pasos:
 
 ```json
 {
-  "owner_name": "Nombre o None",
-  "total_axies": 0,
-  "total_valuation_usd": 0.0,
-  "axies": [ ... ]
+  "owner_name": "Juan Perez",
+  "total_axies": 5,
+  "axies": [...]
 }
 ```
 
@@ -107,34 +107,38 @@ El algoritmo utiliza un sistema de fallback progresivo con 6 pasos:
   3. Menú de consola (subprocess)
 - Manejo de limpieza al salir (KeyboardInterrupt)
 
+### core/endpoint.js
+
+- API de Sky Mavis implementada en Node.js
+- Funciones principales:
+  - `getAxieDetails(axieId)`: Obtiene detalles de un Axie
+  - `getWalletAxies(walletId, from, size)`: Obtiene Axies de una billetera
+  - `getSimilarAxiesRaw(criteria, from, size)`: Busca axies similares
+  - `getSimilarAxies(axie, from, size)`: Algoritmo recursivo de similares
+  - `getAxieValuation(similarAxies, tipoCalculo)`: Calcula valoración
+- Lee variables de entorno del proceso padre
+- Maneja conversión de queries GraphQL internamente
+
+### core/endpoint.py
+
+- Wrapper Python que orquesta llamadas a `core/endpoint.js`
+- Pasa variables de entorno usando el parámetro `env` de `subprocess.run()`
+- Métodos:
+  - `get_axie_details(axie_id)`: Wrapper de getAxieDetails
+  - `get_wallet_axies(wallet_id, from, size)`: Wrapper de getWalletAxies
+  - `get_similar_axies(axie, from, size)`: Wrapper de getSimilarAxies
+
 ### core/logic.py
 
-- Clase `AxieLogic`: Coordina Moralis y Sky Mavis
+- Clase `AxieLogic`: Coordina llamadas a endpoint.py
 - Métodos:
   - `load_owners_data()`: Carga wallets_for_first_owner_finding.json
+  - `update_owners_data(json_content)`: Actualiza el archivo JSON
   - `get_owner_name(address)`: Busca nombre de owner
   - `get_first_owner(axie_id)`: Rastrea historial de transferencias
   - `get_complete_axie_data(axie_id)`: Datos completos + valoración + primer dueño
   - `get_all_axies_from_wallet(address)`: Axies adultos (stage == 4)
   - `calculate_wallet_summary(address)`: Resumen económico
-
-### core/moralis.py
-
-- Clase `Moraliscore`
-- Métodos:
-  - `get_axie_by_id(axie_id)`: Datos de un Axie
-  - `get_wallet_axies(address)`: Axies de billetera
-  - `get_nft_transfers(token_id)`: Historial de transferencias
-- Rate limiting: 1 segundo de espera en código 429
-
-### core/skymavis.py
-
-- Clase `SkyMaviscore`
-- Métodos:
-  - `fetch_marketplace(criteria_dict, size)`: Búsqueda GraphQL
-  - `search_similar_axies(base_axie)`: Algoritmo de similares
-  - `get_axie_valuation(base_axie)`: Wrapper público
-- Manejo de errores silencioso (retorna None en fallos)
 
 ### core/utils.py
 
@@ -142,7 +146,6 @@ El algoritmo utiliza un sistema de fallback progresivo con 6 pasos:
 - `format_ronin_address(address)`: Convierte 0x a ronin:
 - `format_currency(amount)`: Formato USD
 - `get_axie_url(axie_id)`: URL del marketplace
-- `get_wallet_url(address)`: URL del perfil
 
 ### interfaces/bot.py
 
@@ -169,31 +172,23 @@ El algoritmo utiliza un sistema de fallback progresivo con 6 pasos:
 
 ## Variables de Entorno
 
-| Variable              | Requerido | Default                                    | Descripción                 |
-| --------------------- | --------- | ------------------------------------------ | --------------------------- |
-| MORALIS_API_KEY       | Sí        | -                                          | API key de Moralis          |
-| MORALIS_URL           | No        | https://deep-index.moralis.io/api/v2.2     | Endpoint de Moralis         |
-| CONTRACT              | No        | 0x32953928646d7367332260ed41ce1841f3e97910 | Dirección del contrato Axie |
-| CHAIN                 | No        | ronin                                      | Red (ronin)                 |
-| SKYMAVIS_API_KEY      | Sí        | -                                          | API key de Sky Mavis        |
-| AXIE_MARKETPLACE_BASE | Sí        | -                                          | URL base del marketplace    |
-| GRAPHQL_URL           | Sí        | -                                          | Endpoint GraphQL            |
-| BEARER                | Sí        | -                                          | Token de autenticación      |
-| COOKIE_VALUE          | Sí        | -                                          | Cookie de sesión            |
-| TELEGRAM_TOKEN        | No        | -                                          | Token del bot               |
-| TELEGRAM_CHAT_ID      | No        | -                                          | ID de chat autorizado       |
+| Variable                | Requerido | Default                                                                      | Descripción                       |
+| ----------------------- | --------- | ---------------------------------------------------------------------------- | --------------------------------- |
+| SKYMAVIS_API_KEY        | Sí        | -                                                                            | API key de Sky Mavis              |
+| ENDPOINT_GRAPHQL        | No        | https://api-gateway.skymavis.com/graphql/axie-marketplace                    | Endpoint GraphQL de Axies         |
+| TELEGRAM_TOKEN          | No        | -                                                                            | Token del bot                     |
+| TELEGRAM_CHAT_ID        | No        | -                                                                            | ID de chat autorizado             |
 
 ## Rate Limiting
 
-- **Moralis**: 1 segundo de espera en código 429, luego reintento automático
-- **Sky Mavis**: Manejo básico de errores (retorna None)
+- La API de Sky Mavis puede retornar código 429 (Too Many Requests)
+- Recomendación: agregar delays entre llamadas si se procesan muchas billeteras
 
 ## Limitaciones Conocidas
 
-1. Las peticiones a Sky Mavis pueden fallar silenciosamente (retornan None)
-2. El proyecto debe ejecutarse desde la raíz (imports absolutos)
-3. El bot de Telegram procesa máximo 15 Axies por billetera (límite de seguridad)
-4. Se añade delay de 0.4s entre mensajes al enviar Axies a Telegram
+1. El proyecto debe ejecutarse desde la raíz (imports absolutos)
+2. El bot de Telegram procesa máximo 15 Axies por billetera (límite de seguridad)
+3. Se añade delay de 0.4s entre mensajes al enviar Axies a Telegram
 
 ## Archivo wallets_for_first_owner_finding.json
 

@@ -1,0 +1,18 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="axielens_grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#22d3ee;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <path d="M28 25C25 18 31 12 38 15C35 18 33 22 33 25H28Z" fill="url(#axielens_grad)" transform="rotate(-25 30.5 25)" />
+  
+  <path d="M72 25C75 18 69 12 62 15C65 18 67 22 67 25H72Z" fill="url(#axielens_grad)" transform="rotate(25 69.5 25)" />
+
+  <rect x="68" y="70" width="25" height="10" rx="5" transform="rotate(45 68 70)" fill="url(#axielens_grad)" />
+
+  <path d="M50 15C33.4315 15 20 28.4315 20 45C20 61.5685 33.4315 75 50 75C66.5685 75 80 61.5685 80 45C80 28.4315 66.5685 15 50 15ZM50 67C37.8497 67 28 57.1503 28 45C28 32.8497 37.8497 23 50 23C62.1503 23 72 32.8497 72 45C72 57.1503 62.1503 67 50 67Z" fill="url(#axielens_grad)" />
+
+  <circle cx="50" cy="45" r="10" fill="url(#axielens_grad)" />
+</svg>

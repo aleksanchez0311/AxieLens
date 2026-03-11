@@ -29,6 +29,20 @@ if __name__ == "__main__":
     print("\n[3/3] Iniciando Menú de consola...")
     menu_process = subprocess.Popen([sys.executable, "interfaces/menu.py"])
 
+    # 4. Mantener el orquestador vivo
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\\nCerrando procesos...")
+        # if web_thread:
+        #     web_thread.shutdown(wait=False) # web_thread no tiene shutdown. Se cerrará con el proceso principal
+        if bot_process:
+            bot_process.terminate()
+        if menu_process:
+            menu_process.terminate()
+        print("    ✓ Todos los procesos terminados.")
+
     # Esperar a que cualquiera de los procesos termine
     try:
         # Monitorear los procesos

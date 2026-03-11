@@ -1,4 +1,4 @@
-# Axie Classifier
+# Axie Lens
 
 Aplicación para valuar Axies NFT y analizar billeteras en el ecosistema Axie Infinity (Ronin).
 
@@ -14,12 +14,13 @@ Aplicación para valuar Axies NFT y analizar billeteras en el ecosistema Axie In
 ## Requisitos
 
 - Python 3.8+
-- API keys de Moralis y Sky Mavis
+- Node.js 18+
+- API key de Sky Mavis
 
 ## Instalación
 
 1. Clonar el repositorio
-2. Instalar dependencias:
+2. Instalar dependencias Python:
 
 ```powershell
 pip install -r requirements.txt
@@ -28,18 +29,11 @@ pip install -r requirements.txt
 3. Configurar variables de entorno en `.env`:
 
 ```env
-# Moralis API
-MORALIS_API_KEY=tu_api_key
-MORALIS_URL=https://deep-index.moralis.io/api/v2.2
-CONTRACT=0x32953928646d7367332260ed41ce1841f3e97910
-CHAIN=ronin
-
-# Sky Mavis API
+# Sky Mavis API (requerido)
 SKYMAVIS_API_KEY=tu_api_key
-AXIE_MARKETPLACE_BASE=https://app.axieinfinity.com/marketplace/axies/
-GRAPHQL_URL=https://graphql.axieinfinity.com/graphql
-BEARER=tu_bearer
-COOKIE_VALUE=tu_cookie
+
+# Endpoints GraphQL (opcionales)
+ENDPOINT_GRAPHQL=https://api-gateway.skymavis.com/graphql/axie-marketplace
 
 # Telegram (opcional)
 TELEGRAM_TOKEN=tu_token
@@ -76,35 +70,67 @@ Esto iniciarán:
 - 👛 Ver Wallet (Detalle) - Ver Axies en billetera
 - 📊 Resumen Wallet - Resumen económico de billetera
 
+## Arquitectura
+
+El sistema utiliza una arquitectura Python → Node.js:
+
+```
+Python (app.py, logic.py)
+    ↓调用
+Python (endpoint.py) - Wrapper
+    ↓ subprocess.run(env=...)
+Node.js (endpoint.js) - API calls
+    ↓ HTTP
+Sky Mavis GraphQL API
+```
+
+### core/endpoint.js
+
+- API de Sky Mavis implementada en Node.js
+- Funciones: getAxieDetails, getWalletAxies, getSimilarAxies
+
+### core/endpoint.py
+
+- Wrapper Python que orquesta llamadas a Node.js
+- Pasa variables de entorno al proceso hijo
+
+## Algoritmo de Valuación
+
+El sistema utiliza un algoritmo de fallback progresivo de 7 pasos para encontrar Axies similares:
+
+1. **bodyShape + class + parts** (original)
+2. **class + parts** (sin bodyShape)
+3. **class + parts sin eyes**
+4. **class + parts sin ears**
+5. **sin eyes y ears**
+6. **solo parts** (sin class)
+7. Si no hay resultados, retorna vacío
+
+La valoración se calcula usando la mediana de precios de los 10 Axies más baratos encontrados.
+
 ## Estructura del Proyecto
 
 ```
 AxieLens/
 ├── app.py                    # Punto de entrada principal (orquestador)
+├── .env.example              # Ejemplo de variables de entorno
+├── .gitignore                # Archivos ignorados por Git
+├── AGENTS.md                 # Guía para agentes IA
+├── README.md                 # Documentación principal
+├── specs.md                  # Especificaciones técnicas
+├── requirements.txt          # Dependencias Python
+├── wallets_for_first_owner_finding.json.example  # Ejemplo de mapeo de owners
 ├── core/
 │   ├── logic.py             # Capa de lógica de negocio (AxieLogic)
-│   ├── skymavis.py         # API de Sky Mavis (Marketplace/Valuación)
-│   ├── moralis.py          # API de Moralis (NFTs)
-│   └── utils.py            # Utilidades (formato, URLs, .env)
+│   ├── endpoint.py          # Wrapper Python para endpoint.js
+│   ├── endpoint.js          # API de Sky Mavis (Node.js)
+│   └── utils.py             # Utilidades (formato, URLs, .env)
 ├── interfaces/
-│   ├── bot.py              # Bot de Telegram interactivo
-│   ├── menu.py             # Menú de consola interactivo
-│   └── server.py           # Servidor web Flask
+│   ├── bot.py               # Bot de Telegram interactivo
+│   ├── menu.py              # Menú de consola interactivo
+│   └── server.py            # Servidor web Flask
 └── templates/               # Plantillas HTML (index, privacy, terms)
 ```
-
-## Algoritmo de Valuación
-
-El sistema utiliza un algoritmo de fallback progresivo de 6 pasos para encontrar Axies similares:
-
-1. **Paso 0**: Clase + Forma + 12 partes (dual base/EVO)
-2. **Paso 1**: Exacto (Forma/Clase/Evo)
-3. **Paso 2**: Clase + Partes (Sin Forma)
-4. **Paso 5**: Clase + Partes Base
-5. **Paso 6**: Solo Partes Base
-6. **Paso 9**: Core 4 (Mouth/Horn/Back/Tail)
-
-La valoración se calcula usando la mediana de precios de los 10 Axies más baratos encontrados.
 
 ## Archivo wallets_for_first_owner_finding.json
 

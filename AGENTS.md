@@ -4,76 +4,71 @@ Este archivo proporciona orientación a los agentes que trabajan en este reposit
 
 ## Estructura del Proyecto
 
-- **app.py**: Punto de entrada principal. Orquestador que inicia servidor web, bot de Telegram y menú interactivo como procesos separados.
-- **core/logic.py**: Capa de lógica de negocio. Coordina Moralis y Sky Mavis, maneja el tracking del primer dueño y el cálculo de resúmenes.
-- **interfaces/menu.py**: Menú interactivo de consola para consultas locales.
-- **interfaces/server.py**: Servidor web Flask que sirve las plantillas HTML.
-- **core/**: Módulos de acceso a APIs externas.
-  - **skymavis.py**: Conexión a Sky Mavis GraphQL API (Marketplace/Valuación).
-  - **moralis.py**: Conexión a Moralis API (datos de NFTs y billeteras).
-  - **utils.py**: Utilidades compartidas (formateo de direcciones, moneda, URLs, carga de variables de entorno).
-- **interfaces/**: Módulos de mensajería.
-  - **bot.py**: Bot de Telegram interactivo con menú y comandos.
-- **templates/**: Plantillas HTML para el servidor web (index.html, privacy.html, terms.html).
+```
+AxieLens/
+├── app.py                    # Punto de entrada principal (orquestador)
+├── .env.example              # Ejemplo de variables de entorno
+├── .gitignore                # Archivos ignorados por Git
+├── AGENTS.md                 # Guía para agentes IA
+├── README.md                 # Documentación principal
+├── specs.md                  # Especificaciones técnicas
+├── requirements.txt          # Dependencias Python
+├── wallets_for_first_owner_finding.json.example  # Ejemplo de mapeo de owners
+├── core/
+│   ├── logic.py             # Capa de lógica de negocio (AxieLogic)
+│   ├── endpoint.py          # Wrapper Python para endpoint.js
+│   ├── endpoint.js          # API de Sky Mavis (Node.js)
+│   └── utils.py             # Utilidades (formato, URLs, .env)
+├── interfaces/
+│   ├── bot.py               # Bot de Telegram interactivo
+│   ├── menu.py              # Menú de consola interactivo
+│   └── server.py            # Servidor web Flask
+└── templates/               # Plantillas HTML (index, privacy, terms)
+```
 
 ## Patrones No Obvios (Críticos)
 
-### API Keys con Defaults Vacíos
+### Integración Python → Node.js
 
-- [`core/skymavis.py:13-19`](core/skymavis.py:13) - `AXIE_MARKETPLACE_BASE`, `SKYMAVIS_API_KEY`, `GRAPHQL_URL`, `BEARER`, `COOKIE_VALUE` se leen con `os.environ.get()` y default `""`. Si faltan, las peticiones fallan silenciosamente.
+- [`core/endpoint.py`](core/endpoint.py:1) orquesta las llamadas a [`core/endpoint.js`](core/endpoint.js:1)
+- Las variables de entorno se pasan al proceso Node.js mediante el parámetro `env` de `subprocess.run()`
+- El script Node.js debe ejecutarse siempre con las variables de entorno correctamente configuradas
 
-- [`core/moralis.py:9-18`](core/moralis.py:9) - `MORALIS_API_KEY`, `MORALIS_URL`, `CONTRACT`, `CHAIN` se leen con `os.environ.get()` y tienen valores por defecto:
-  - `MORALIS_URL` default: `https://deep-index.moralis.io/api/v2.2`
-  - `CONTRACT` default: `0x32953928646d7367332260ed41ce1841f3e97910`
-  - `CHAIN` default: `ronin`
+### graphQLToJsonQuery.js
+
+- [`core/endpoint.js`](core/endpoint.js:1) maneja la conversión de queries GraphQL internamente
+
+### Variables de Entorno
+
+- `SKYMAVIS_API_KEY` (requerido): API key de Sky Mavis
+- `ENDPOINT_GRAPHQL` (opcional): Endpoint GraphQL de Axies
 
 ### Ejecución desde Raíz
 
 - [`app.py`](app.py:1) usa imports absolutos. El proyecto **debe** ejecutarse siempre desde la raíz (`python app.py`).
 
-### Rate Limiting
+### Algoritmo de Búsqueda de Similares (7 Pasos)
 
-- [`core/moralis.py:25-27`](core/moralis.py:25) implementa un reintento automático tras 1 segundo si recibe un error 429 (Too Many Requests).
+[`core/endpoint.js`](core/endpoint.js:1) utiliza un sistema de fallback progresivo:
 
-### Manejo de Errores Silencioso
-
-- [`core/skymavis.py:34-45`](core/skymavis.py:34) retorna `None` en fallos de red o GraphQL sin lanzar excepciones.
-
-### Algoritmo de Búsqueda de Similares (6 Pasos)
-
-[`core/skymavis.py:81-192`](core/skymavis.py:81) utiliza un sistema de fallback progresivo simplificado:
-
-1. **Paso 0**: Clase + Forma + 12 partes (dual base/EVO)
-2. **Paso 1**: Exacto (Forma/Clase/Evo)
-3. **Paso 2**: Clase + Partes (Sin Forma)
-4. **Paso 5**: Clase + Partes Base
-5. **Paso 6**: Solo Partes Base
-6. **Paso 9**: Core 4 (Mouth/Horn/Back/Tail)
-
-### Detección de Evolución
-
-- [`core/skymavis.py:94-99`](core/skymavis.py:94) proporciona funciones para obtener IDs base y EVO de partes:
-  - `get_base_id(part)`: Limpia sufijos `-2` del ID usando regex
-  - `get_evo_id(part)`: Añade `-2` para versión EVO
-
-### Paginación en Moralis
-
-- [`core/moralis.py:49-61`](core/moralis.py:49) maneja la obtención de NFTs de billeteras mediante `cursor`.
-
-### Filtrado de Axies
-
-- [`core/logic.py:84-90`](core/logic.py:84) filtra axies por `stage == 4` (Adultos) al obtener de billeteras.
+1. **bodyShape + class + parts** (original)
+2. **class + parts** (sin bodyShape)
+3. **class + parts sin eyes**
+4. **class + parts sin ears**
+5. **sin eyes y ears**
+6. **solo parts** (sin class)
+7. Si no hay resultados, retorna vacío
 
 ### Tracking del Primer Dueño
 
-- [`core/logic.py:50-72`](core/logic.py:50) implementa `get_first_owner()` que:
-  1. Obtiene el historial de transferencias del Axie mediante `get_nft_transfers()`
+- [`core/logic.py`](core/logic.py:1) implementa `get_first_owner()` que:
+  1. Obtiene el historial de transferencias del Axie
   2. Busca primero si algún address en nuestra lista (`wallets_for_first_owner_finding.json`) aparece en el historial
   3. Si no hay match, usa el primer poseedor real (desde la dirección 0x000...)
 
 ### Archivo wallets_for_first_owner_finding.json
 
-- [`core/logic.py:25-36`](core/logic.py:25) carga un archivo `wallets_for_first_owner_finding.json` en la raíz que mapea nombres de owners a sus billeteras.
+- [`core/logic.py:23-34`](core/logic.py:23) carga un archivo `wallets_for_first_owner_finding.json` en la raíz
 - Formato esperado: `{ "NombreOwner": { "ronin": "ronin:...", "0x": "0x..." } }`
 - Se usa para mostrar nombres legibles en lugar de direcciones.
 
@@ -107,22 +102,18 @@ python app.py
 
 El archivo `.env` debe residir en la raíz y contener:
 
-### APIs (Requeridas)
+### APIs (Requerida)
 
-- `MORALIS_API_KEY`: Para obtener datos de NFTs y carteras.
-- `MORALIS_URL`: Endpoint de Moralis (ej: https://deep-index.moralis.io/api/v2.2)
-- `CONTRACT`: Dirección del contrato Axie Ronin (default: 0x32953928646d7367332260ed41ce1841f3e97910)
-- `CHAIN`: Red (ej: ronin)
+- `SKYMAVIS_API_KEY`: API key de Sky Mavis
 
-- `SKYMAVIS_API_KEY`: Para consultas al Marketplace/Valuación.
-- `AXIE_MARKETPLACE_BASE`: URL base del marketplace (ej: https://app.axieinfinity.com/marketplace/axies/)
-- `GRAPHQL_URL`: Endpoint GraphQL de Sky Mavis
-- `BEARER` y `COOKIE_VALUE`: Necesarios para ciertas peticiones a Sky Mavis.
+### APIs (Opcionales)
 
-### Telegram (Opcional - para notificaciones)
+- `ENDPOINT_GRAPHQL`: Endpoint GraphQL de Axies (default: https://api-gateway.skymavis.com/graphql/axie-marketplace)
 
-- `TELEGRAM_TOKEN`: Token del bot de Telegram.
-- `TELEGRAM_CHAT_ID`: ID de chat autorizado (si está vacío, permite cualquier usuario).
+### Telegram (Opcional)
+
+- `TELEGRAM_TOKEN`: Token del bot de Telegram
+- `TELEGRAM_CHAT_ID`: ID de chat autorizado (si está vacío, permite cualquier usuario)
 
 ## Archivo wallets_for_first_owner_finding.json
 

@@ -8,7 +8,7 @@ import logging
 root_dir = Path(__file__).parent.parent
 sys.path.append(str(root_dir))
 
-from flask import Flask, render_template
+from flask import Flask, render_template, send_from_directory
 
 # Configurar Flask - buscar templates en la carpeta raíz
 template_dir = root_dir / "templates"
@@ -32,6 +32,11 @@ def privacy():
 @app.route("/terms")
 def terms():
     return render_template("terms.html")
+
+
+@app.route("/favicon.svg")
+def favicon():
+    return send_from_directory(os.path.join(root_dir, "templates"), "favicon.svg", mimetype="image/svg+xml")
 
 
 def run_server(port=5000):

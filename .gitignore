@@ -20,6 +20,9 @@ wheels/
 .installed.cfg
 *.egg
 
+# Ruff
+.ruff_cache/
+
 # Virtual environments
 venv/
 env/
@@ -44,3 +47,10 @@ Thumbs.db
 # Project specific
 wallets_for_first_owner_finding.json
 *.log
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json

@@ -1,6 +1,10 @@
 import os
 from pathlib import Path
 
+AXIE_MARKETPLACE_BASE = os.environ.get("AXIE_MARKETPLACE_BASE", "https://app.axieinfinity.com/")
+AXIE_MARKETPLACE_PROFILE = AXIE_MARKETPLACE_BASE + "profile/"
+AXIE_MARKETPLACE_AXIEVIEW = AXIE_MARKETPLACE_BASE + "marketplace/axies/"
+
 
 # --- CARGAR VARIABLES DE ENTORNO ---
 def load_env():
@@ -15,6 +19,36 @@ def load_env():
                     # Limpiar comillas si existen
                     value = value.strip("'").strip('"')
                     os.environ[key] = value
+
+
+def update_env_var(key, new_value):
+    """Actualiza o añade una variable en el archivo .env y en os.environ."""
+    env_path = Path(__file__).parent.parent / ".env"
+    lines = []
+    found = False
+
+    # Leer contenido existente si el archivo existe
+    if env_path.exists():
+        with open(env_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+
+    # Modificar o añadir linea
+    for i, line in enumerate(lines):
+        if line.strip().startswith(f"{key}="):
+            lines[i] = f"{key}={new_value}\n"
+            found = True
+            break
+
+    if not found:
+        # Añadir al final, asegurando que haya un salto de linea antes si el archivo no termina en uno
+        if lines and not lines[-1].endswith("\n"):
+            lines.append("\n")
+        lines.append(f"{key}={new_value}\n")
+
+    with open(env_path, "w", encoding="utf-8") as f:
+        f.writelines(lines)
+
+    os.environ[key] = str(new_value)
 
 
 def format_ronin_address(address):
@@ -39,9 +73,9 @@ def format_currency(amount):
 
 def get_axie_url(axie_id):
     """Genera la URL del marketplace para un Axie."""
-    return f"https://app.axieinfinity.com/marketplace/axies/{axie_id}/"
+    return f"{AXIE_MARKETPLACE_AXIEVIEW}{axie_id}/"
 
 
 def get_wallet_url(address):
     """Genera la URL del marketplace para una billetera."""
-    return f"https://app.axieinfinity.com/profile/{address}/axie/"
+    return f"{AXIE_MARKETPLACE_PROFILE}{address}/axie/"

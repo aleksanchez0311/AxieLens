@@ -36,7 +36,13 @@ TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
 AUTHORIZED_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 
 # Estados de la conversación
-CHOOSING, TYPING_ID, TYPING_WALLET_VIEW, TYPING_WALLET_SUMMARY = range(4)
+(
+    CHOOSING,
+    TYPING_ID,
+    TYPING_WALLET_VIEW,
+    TYPING_WALLET_SUMMARY,
+    AWAITING_WALLETS_JSON,
+) = range(5)
 
 
 def format_axie_message_tg(data):
@@ -44,19 +50,24 @@ def format_axie_message_tg(data):
 
     axie_id = data.get("id")
     similar_id = data.get("similar_axie_id")
-    curr_addr = data.get("owner_of")
+    curr_addr = data.get("current_owner_address")
     first_addr = data.get("first_owner")
-    val = data.get("valuation", {})
+    val = data.get("valuation", 0.0)
 
     metadata = data.get("metadata", {})
-    properties = metadata.get("properties", {})
-    clase = properties.get("class", "N/A")
+    # Usar los nuevos campos directamente
+    clase = data.get("class_name", "N/A")
 
-    valuacion = format_currency(val.get("valuation_usd", 0))
-    metodo = val.get("method", "N/A")
+    valuacion = format_currency(val)
+    metodo = data.get("valuation_method", "Calculado")
 
     axie_url = get_axie_url(axie_id) if axie_id else "N/A"
-    similar_axie_url = get_axie_url(similar_id) if similar_id else "N/A"
+    # El ID del similar debería ser un ID de Axie, pero si por alguna razón
+    # es una dirección de billetera (raro), usaríamos get_wallet_url.
+    if similar_id and isinstance(similar_id, str) and len(similar_id) > 15:
+        similar_axie_url = get_wallet_url(similar_id)
+    else:
+        similar_axie_url = get_axie_url(similar_id) if similar_id else "N/A"
     curr_addr_url = get_wallet_url(curr_addr) if curr_addr else "N/A"
 
     if first_addr:
@@ -68,7 +79,7 @@ def format_axie_message_tg(data):
 
     msg = [
         f"👾 {axie_url}",
-        f"👾 *Axie #{axie_id}* ({clase})",
+        f"👾 *Axie {axie_id}* ({clase})",
         f"👶 *Primer Dueño:* {first_name}",
         f"👶 🔗 [Ver en Marketplace] *URL Primer Dueño:* {first_addr_url}",
         f"👤 🔗 [Ver en Marketplace] *URL Dueño Actual:* {curr_addr_url}",
@@ -87,9 +98,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_keyboard = [
         ["🔍 Buscar ID"],
         ["👛 Ver Wallet (Detalle)", "📊 Resumen Wallet"],
+        ["🔄 Actualizar Billeteras"],
     ]
     await update.message.reply_text(
-        "🚀 *Axie Classifier Bot*\n¿Qué deseas hacer hoy?",
+        "🚀 *Axie Lens Bot*\n¿Qué deseas hacer hoy?",
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard, one_time_keyboard=True, resize_keyboard=True
         ),
@@ -117,6 +129,12 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
             parse_mode="Markdown",
         )
         return TYPING_WALLET_SUMMARY
+    elif text == "🔄 Actualizar Billeteras":
+        await update.message.reply_text(
+            "📁 *Actualizar JSON de Billeteras*\nEnvía el nuevo archivo `.json` o pega el contenido JSON como texto directamente:",
+            parse_mode="Markdown",
+        )
+        return AWAITING_WALLETS_JSON
     else:
         await update.message.reply_text("Opción no válida. Usa el teclado inferior.")
         return CHOOSING
@@ -130,13 +148,22 @@ async def process_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return TYPING_ID
 
     await update.message.reply_text(f"⏳ Analizando Axie #{a_id}...")
-    data = logic.get_complete_axie_data(a_id)
-    if data:
+    try:
+        data = logic.get_complete_axie_data(a_id)
+        if data:
+            await update.message.reply_text(
+                format_axie_message_tg(data), parse_mode="Markdown"
+            )
+        else:
+            await update.message.reply_text("❌ Axie no encontrado.")
+    except ConnectionError as e:
         await update.message.reply_text(
-            format_axie_message_tg(data), parse_mode="Markdown"
+            f"❌ *{str(e)}*\n\n"
+            "🔑 *Actualizar Credenciales de Sky Mavis*\n\n"
+            "Envía el `BEARER` y la `COOKIE_VALUE` separados por una línea vacía.",
+            parse_mode="Markdown",
         )
-    else:
-        await update.message.reply_text("❌ Axie no encontrado.")
+        return AWAITING_CREDENTIALS
 
     return await start(update, context)
 
@@ -155,14 +182,19 @@ async def process_wallet_view(update: Update, context: ContextTypes.DEFAULT_TYPE
         await update.message.reply_text("❌ No se encontraron Axies adultos.")
     else:
         await update.message.reply_text(f"📦 Procesando {len(axies)} Axies...")
-        for a in axies[:15]:  # Límite de seguridad
-            a_id = a.get("token_id") or a.get("id")
-            data = logic.get_complete_axie_data(a_id)
-            if data:
+        try:
+            for data in axies[:15]:  # Límite de seguridad
+                # data ya debería tener toda la información
                 await update.message.reply_text(
                     format_axie_message_tg(data), parse_mode="Markdown"
                 )
-            await asyncio.sleep(0.4)
+                await asyncio.sleep(0.4)
+        except ConnectionError as e:
+            await update.message.reply_text(
+                f"❌ *{str(e)}*",
+                parse_mode="Markdown",
+            )
+            return await start(update, context)
 
     return await start(update, context)
 
@@ -170,22 +202,69 @@ async def process_wallet_view(update: Update, context: ContextTypes.DEFAULT_TYPE
 async def process_wallet_summary(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Muestra solo el resumen económico y conteo de la billetera."""
     addr = update.message.text.strip()
-    summary_data = logic.calculate_wallet_summary(addr)
+    try:
+        summary_data = logic.calculate_wallet_summary(addr)
 
-    if summary_data["total_axies"] == 0:
-        await update.message.reply_text("❌ Billetera vacía.")
-    else:
-        summary = [
-            f"📊 *RESUMEN DE CUENTA*",
-            f"👤 *Dueño:* {summary_data['owner_name'] or 'Desconocido'}",
-            f"📍 *Ronin:* `{format_ronin_address(addr)}`",
-            f"👾 *Total Axies:* {summary_data['total_axies']}",
-            f"💰 *Valor Estimado:* {format_currency(summary_data['total_valuation_usd'])}",
-        ]
-        await update.message.reply_text("\n".join(summary), parse_mode="Markdown")
+        if summary_data["total_axies"] == 0:
+            await update.message.reply_text("❌ Billetera vacía.")
+        else:
+            summary = [
+                f"📊 *RESUMEN DE CUENTA*",
+                f"👤 *Dueño:* {summary_data['owner_name'] or 'Desconocido'}",
+                f"📍 *Ronin:* `{format_ronin_address(addr)}`",
+                f"👾 *Total Axies:* {summary_data['total_axies']}",
+                f"💰 *Valor Estimado:* {format_currency(summary_data['total_valuation_usd'])}",
+            ]
+            await update.message.reply_text("\n".join(summary), parse_mode="Markdown")
+
+    except ConnectionError as e:
+        await update.message.reply_text(
+            f"❌ *{str(e)}*",
+            parse_mode="Markdown",
+        )
 
     return await start(update, context)
 
+
+async def process_wallets_json(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Procesa el documento o texto JSON enviado."""
+    content = ""
+    try:
+        if update.message.document:
+            doc = update.message.document
+            if not doc.file_name.endswith(".json"):
+                await update.message.reply_text(
+                    "❌ El archivo debe tener extensión .json. Intenta de nuevo:"
+                )
+                return AWAITING_WALLETS_JSON
+
+            file = await context.bot.get_file(doc.file_id)
+            byte_array = await file.download_as_bytearray()
+            content = byte_array.decode("utf-8")
+        elif update.message.text:
+            content = update.message.text
+        else:
+            await update.message.reply_text(
+                "❌ Formato no reconocido. Envía un archivo JSON o pega el texto. Intenta de nuevo:"
+            )
+            return AWAITING_WALLETS_JSON
+    except Exception as e:
+        await update.message.reply_text(
+            f"❌ Error al descargar o leer el archivo:\n{str(e)}\nIntenta de nuevo:"
+        )
+        return AWAITING_WALLETS_JSON
+
+    success, error = logic.update_owners_data(content)
+    if success:
+        await update.message.reply_text(
+            "✅ ¡Lista de billeteras de dueños actualizada correctamente!"
+        )
+        return await start(update, context)
+    else:
+        await update.message.reply_text(
+            f"❌ Error al procesar y guardar el JSON:\n{error}\nIntenta de nuevo enviando un JSON válido:"
+        )
+        return AWAITING_WALLETS_JSON
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Cancela la operación actual."""
@@ -215,6 +294,12 @@ def main():
             TYPING_WALLET_SUMMARY: [
                 MessageHandler(
                     filters.TEXT & ~(filters.COMMAND), process_wallet_summary
+                )
+            ],
+            AWAITING_WALLETS_JSON: [
+                MessageHandler(
+                    (filters.TEXT | filters.Document.ALL) & ~(filters.COMMAND),
+                    process_wallets_json,
                 )
             ],
         },
